@@ -163,6 +163,7 @@ const installAuto1111 = async () => {
     console.log(`Auto1111 Port: ${global.autoPort}`);
 
     let configString = `
+        title Auto1111
         set PYTHON=
         set GIT=
         set VENV_DIR=
@@ -179,7 +180,10 @@ const installAuto1111 = async () => {
         --realesrgan-models-path "${global.dataPath}\\models\\realesrgan" ^
         --swinir-models-path "${global.dataPath}\\models\\swinir" ^
         --textual-inversion-templates-dir "${global.dataPath}\\models\\embeddings" ^
-        --vae-dir "${global.dataPath}\\models\\vae"`
+        --vae-dir "${global.dataPath}\\models\\vae"
+
+        git pull
+        call webui.bat`
 
     console.log(utils.getNameFrom(global.jsonData.autoInstallerUrl));
     const extractPath = path.join(global.currentPath, utils.getNameFrom(global.jsonData.autoInstallerUrl))
