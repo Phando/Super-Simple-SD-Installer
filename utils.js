@@ -311,7 +311,7 @@ class Utils {
         try {
             console.log(`Cloning repo ${chalk.yellow(repoUrl)} -> ${chalk.yellow(targetPath)}`);
             await this.runCommand('git lfs install');
-            await this.runCommand(`git clone --recurse-submodules ${repoUrl} ${targetPath}`);
+            await this.runCommand(`git clone --recurse-submodules "${repoUrl}" "${targetPath}"`);
             console.log('Repository cloned successfully.');
         } catch (error) {
             console.error(chalk.red('Failed to clone repository:'), error);
