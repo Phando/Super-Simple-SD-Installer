@@ -38,7 +38,7 @@ const fetchData = async (data, options = []) => {
     
     console.log(`Installing/Downloading ${chalk.cyan(data.length,)} items...`)
     for (const item of data) {
-        let targetPath = path.join(global.dataPath, item.path);
+        let targetPath = path.join(global.jsonData.dataPath, item.path);
         
         switch(item.type){
             case "get" : 
@@ -69,7 +69,7 @@ const fetchData = async (data, options = []) => {
 const updateLauncher = (filePath) => {
     const modFlag = "@REM GenAI Modified\n";
     const matchString = 'standalone-build';
-    const patchString = `standalone-build --disable-auto-launch --listen --output-directory "${global.dataPath}\\output" --port ${global.comfyPort}`
+    const patchString = `standalone-build --disable-auto-launch --listen --output-directory "${global.jsonData.dataPath}\\output" --port ${global.jsonData.comfyPort}`
 
     console.log(filePath);
     try{
@@ -92,13 +92,13 @@ const updateLauncher = (filePath) => {
 
 // ------------------------------------------------------------------
 const comfyDataFix = () => {
-    utils.makeLink(path.join(global.dataPath,"custom_nodes"),path.join(global.comfyPath, "ComfyUI/custom_nodes"));
-    utils.makeLink(path.join(global.dataPath,"models"),path.join(global.comfyPath, "ComfyUI/models"));
+    utils.makeLink(path.join(global.jsonData.dataPath,"custom_nodes"),path.join(global.comfyPath, "ComfyUI/custom_nodes"));
+    utils.makeLink(path.join(global.jsonData.dataPath,"models"),path.join(global.comfyPath, "ComfyUI/models"));
 }
 
 // ------------------------------------------------------------------
 const onyxFix = async () => {
-    if(!global.useNVidia) {
+    if(!global.jsonData.useNVidia) {
         console.log(chalk.magenta("\nUser selected non-nvidia install, skipping cuda driver check.\n"));
         return        
     }
@@ -123,30 +123,35 @@ const onyxFix = async () => {
 // ------------------------------------------------------------------
 const prepareEnvironment = async () => {
     global.currentPath = process.cwd();
-    execSync('git lfs install');
-    global.rootPath = await utils.promptUser(`\nEnter an ${chalk.yellow("absolute")} path for ${chalk.yellow("GenAI Applications")}`, path.join(global.currentPath,'genai'));
-    global.rootPath = global.rootPath.replace(/["']/g, "");
-    console.log(`GenAI Path: ${global.rootPath}`);
+    global.jsonData = await utils.fetchJson('config.json');
 
+    global.jsonData.rootPath = global.jsonData.rootPath || path.join(global.currentPath,'genai');
+    global.jsonData.dataPath = global.jsonData.dataPath || path.join(global.currentPath,'genai_data');
+    
+    global.jsonData.rootPath = await utils.promptUser(`\nEnter an ${chalk.yellow("absolute")} path for ${chalk.yellow("GenAI Applications")}`, global.jsonData.rootPath);
+    global.jsonData.rootPath = global.jsonData.rootPath.replace(/["']/g, "");
+    console.log(`GenAI Path: ${global.jsonData.rootPath}`);
 
-    global.dataPath = await utils.promptUser(`\nEnter an ${chalk.yellow("absolute")} path for ${chalk.yellow("GenAI Data")} (large file storage)`, path.join(global.currentPath,'genai_data'));
-    global.dataPath = global.dataPath.replace(/["']/g, "");
-    console.log(`GenAI Data Path: ${global.dataPath}`);
+    global.jsonData.dataPath = await utils.promptUser(`\nEnter an ${chalk.yellow("absolute")} path for ${chalk.yellow("GenAI Data")} (large file storage)`, global.jsonData.dataPath);
+    global.jsonData.dataPath = global.jsonData.dataPath.replace(/["']/g, "");
+    console.log(`GenAI Data Path: ${global.jsonData.dataPath}`);
 
-    global.useNVidia = await utils.promptConfirmation(`\nAre you using an NVidia GPU?`);
-    console.log(`NVidia GPU Enabled: ${global.useNVidia}\n`);
+    global.jsonData.useNVidia = await utils.promptConfirmation(`\nAre you using an NVidia GPU?`);
+    console.log(`NVidia GPU Enabled: ${global.jsonData.useNVidia}\n`);
 
-    global.autoPath = path.join(global.rootPath, "auto1111")
-    global.comfyPath = path.join(global.rootPath, "comfyui")
+    global.autoPath = path.join(global.jsonData.rootPath, "auto1111")
+    global.comfyPath = path.join(global.jsonData.rootPath, "comfyui")
     global.pythonPath = path.join(global.comfyPath,"python_embeded/python.exe");
 
-    utils.makeDir(global.rootPath);
+    const jsonString = JSON.stringify(global.jsonData, null, 4);
+    utils.saveFile('config.json', jsonString);
+
+    utils.makeDir(global.jsonData.rootPath);
     directories.forEach((item) => {
-        let myPath = path.join(global.dataPath, item);
+        let myPath = path.join(global.jsonData.dataPath, item);
         utils.makeDir(myPath);
     });
 }
-
 
 // ------------------------------------------------------------------
 const installAuto1111 = async () => {
@@ -156,31 +161,34 @@ const installAuto1111 = async () => {
         console.log(chalk.magenta("\nAuto1111 already installed."));
         return;
     }
-
+    
     console.log(chalk.magenta("\nAuto1111 not installed. Downloading and installing Auto1111..."));
     
-    global.autoPort = await utils.promptUser(`\nEnter a port for the ${chalk.yellow("Automatic1111")} Server`, '7860');
-    console.log(`Auto1111 Port: ${global.autoPort}`);
+    global.jsonData.autoPort = await utils.promptUser(`\nEnter a port for the ${chalk.yellow("Automatic1111")} Server`,  global.jsonData.autoPort);
+    console.log(`Auto1111 Port: ${ global.jsonData.autoPort}`);
+
+    const jsonString = JSON.stringify(global.jsonData, null, 4);
+    utils.saveFile('config.json', jsonString);
 
     let configString = `
         title Auto1111
         set PYTHON=
         set GIT=
         set VENV_DIR=
-        set COMMANDLINE_ARGS= --xformers --update-all-extensions --port ${global.autoPort} ^
-        --ckpt-dir "${global.dataPath}\\models\\checkpoints" ^
-        --codeformer-models-path "${global.dataPath}\\models\\codeformer" ^
-        --controlnet-dir "${global.dataPath}\\models\\controlnet" ^
-        --embeddings-dir "${global.dataPath}\\models\\embeddings" ^
-        --esrgan-models-path "${global.dataPath}\\models\\esrgan" ^
-        --gfpgan-models-path "${global.dataPath}\\models\\gfpgan" ^
-        --hypernetwork-dir "${global.dataPath}\\models\\hypernetworks" ^
-        --ldsr-models-path "${global.dataPath}\\models\\ldsr" ^
-        --lora-dir "${global.dataPath}\\models\\loras" ^
-        --realesrgan-models-path "${global.dataPath}\\models\\realesrgan" ^
-        --swinir-models-path "${global.dataPath}\\models\\swinir" ^
-        --textual-inversion-templates-dir "${global.dataPath}\\models\\embeddings" ^
-        --vae-dir "${global.dataPath}\\models\\vae"
+        set COMMANDLINE_ARGS= --xformers --update-all-extensions --port ${ global.jsonData.autoPort} ^
+        --ckpt-dir "${global.jsonData.dataPath}\\models\\checkpoints" ^
+        --codeformer-models-path "${global.jsonData.dataPath}\\models\\codeformer" ^
+        --controlnet-dir "${global.jsonData.dataPath}\\models\\controlnet" ^
+        --embeddings-dir "${global.jsonData.dataPath}\\models\\embeddings" ^
+        --esrgan-models-path "${global.jsonData.dataPath}\\models\\esrgan" ^
+        --gfpgan-models-path "${global.jsonData.dataPath}\\models\\gfpgan" ^
+        --hypernetwork-dir "${global.jsonData.dataPath}\\models\\hypernetworks" ^
+        --ldsr-models-path "${global.jsonData.dataPath}\\models\\ldsr" ^
+        --lora-dir "${global.jsonData.dataPath}\\models\\loras" ^
+        --realesrgan-models-path "${global.jsonData.dataPath}\\models\\realesrgan" ^
+        --swinir-models-path "${global.jsonData.dataPath}\\models\\swinir" ^
+        --textual-inversion-templates-dir "${global.jsonData.dataPath}\\models\\embeddings" ^
+        --vae-dir "${global.jsonData.dataPath}\\models\\vae"
 
         git pull
         call webui.bat`
@@ -208,7 +216,7 @@ const installAuto1111 = async () => {
 const cycleComfyUI = async (waitTime = 180) => {
     global.childRunning = true;
     let count = 0;
-    let args = ['-s', 'ComfyUI/main.py', '--windows-standalone-build', '--disable-auto-launch', '--port', global.comfyPort];
+    let args = ['-s', 'ComfyUI/main.py', '--windows-standalone-build', '--disable-auto-launch', '--port', global.jsonData.comfyPort];
     if(!useNVidia){
         args.push('--cpu');
     }
@@ -276,7 +284,7 @@ const installCustomNodes = async () => {
     // Manual Installs
     const data = utils.filterWithOptions(global.jsonData.customNodes, [{setup:"custom"}]);
     for(const item of data){
-        let nodePath = path.join(global.dataPath, item.path); 
+        let nodePath = path.join(global.jsonData.dataPath, item.path); 
         let repoPath = await utils.cloneRepository(item.url, nodePath);
 
         process.stdout.write(`Setting up: ${chalk.yellow(item.note)}`);
@@ -311,17 +319,20 @@ const installComfyUI = async () => {
 
     console.log(chalk.magenta("\nComfyUI not installed. Downloading and installing ComfyUI..."));
 
-    global.comfyPort = await utils.promptUser(`\nEnter a port for the ${chalk.yellow("ComfyUI")} Server`, '7861');
-    console.log(`ComfyUI Port: ${global.comfyPort}`);
+    global.jsonData.comfyPort = await utils.promptUser(`\nEnter a port for the ${chalk.yellow("ComfyUI")} Server`, global.jsonData.comfyPort);
+    console.log(`ComfyUI Port: ${global.jsonData.comfyPort}`);
+    
+    const jsonString = JSON.stringify(global.jsonData, null, 4);
+    utils.saveFile('config.json', jsonString);
 
     // const configString = `
     // #config for a1111 ui
     // a111:
-    //     base_path: "${global.dataPath}"
+    //     base_path: "${global.jsonData.dataPath}"
 
-    //     checkpoints: "${global.dataPath}/models/checkpoints"
-    //     configs: "${global.dataPath}/models/checkpoints"
-    //     vae: "${global.dataPath}/models/vae"
+    //     checkpoints: "${global.jsonData.dataPath}/models/checkpoints"
+    //     configs: "${global.jsonData.dataPath}/models/checkpoints"
+    //     vae: "${global.jsonData.dataPath}/models/vae"
     //     loras: |
     //         models/loras
     //         models/lycoris
@@ -329,12 +340,12 @@ const installComfyUI = async () => {
     //         models/esrgan
     //         models/realesrgan
     //         models/swinir
-    //     embeddings: "${global.dataPath}/models/embeddings"
-    //     hypernetworks: "${global.dataPath}/models/hypernetworks"
-    //     controlnet: "${global.dataPath}/models/controlnet"
+    //     embeddings: "${global.jsonData.dataPath}/models/embeddings"
+    //     hypernetworks: "${global.jsonData.dataPath}/models/hypernetworks"
+    //     controlnet: "${global.jsonData.dataPath}/models/controlnet"
 
     // comfyui:
-    //     base_path: "${global.dataPath}"
+    //     base_path: "${global.jsonData.dataPath}"
     //     checkpoints: models/checkpoints
     //     classifiers: models/classifiers
     //     clip: models/clip
@@ -352,9 +363,9 @@ const installComfyUI = async () => {
 
     // other_ui:
     //     # base_path: path/to/ui
-    //     # checkpoints: "${global.dataPath}/models/checkpoints"
-    //     # gligen: "${global.dataPath}/models/gligen"
-    //     # custom_nodes: "${global.dataPath}/custom_nodes"
+    //     # checkpoints: "${global.jsonData.dataPath}/models/checkpoints"
+    //     # gligen: "${global.jsonData.dataPath}/models/gligen"
+    //     # custom_nodes: "${global.jsonData.dataPath}/custom_nodes"
     // `
 
 //     let folderMatch = "base_path = os.path.dirname(os.path.realpath(__file__))"
@@ -366,7 +377,7 @@ const installComfyUI = async () => {
 //         return folder_path
 //     else:
 //         return os.path.dirname(os.path.realpath(__file__))
-// base_path = check_folder_exists("${global.dataPath}")
+// base_path = check_folder_exists("${global.jsonData.dataPath}")
 
 // `
 
@@ -416,9 +427,9 @@ const installFFMpeg = async () => {
         .catch(error => console.error(error));
 
     let ffmpegPath = await utils.searchFor(global.currentPath, "ffmpeg");
-    await utils.moveItem(path.join(global.currentPath, ffmpegPath[0], 'bin'), path.join(global.rootPath, 'ffmpeg'));
+    await utils.moveItem(path.join(global.currentPath, ffmpegPath[0], 'bin'), path.join(global.jsonData.rootPath, 'ffmpeg'));
     fse.removeSync(path.join(global.currentPath, ffmpegPath[0]));
-    utils.addToSystemPath(path.join(global.rootPath, 'ffmpeg'));
+    utils.addToSystemPath(path.join(global.jsonData.rootPath, 'ffmpeg'));
     console.log(`Install complete: ${chalk.yellow("FFMpeg")}`);
 }
 
@@ -430,7 +441,7 @@ const installControlLora = async () =>  {
         return;
     }
 
-    let visionPath = path.join(global.dataPath, "models/clip_vision");
+    let visionPath = path.join(global.jsonData.dataPath, "models/clip_vision");
     
     if(fs.existsSync(visionPath)){
         console.log(chalk.magenta("\nControl-Lora already installed."));
@@ -441,7 +452,7 @@ const installControlLora = async () =>  {
 
     // Copy the controlnets
     let sourcePath = await utils.cloneRepository(global.jsonData.controlLora, global.currentPath)
-    let targetPath = path.join(global.dataPath, "models", "controlnet");
+    let targetPath = path.join(global.jsonData.dataPath, "models", "controlnet");
 
     console.log("sourcePath", sourcePath, targetPath);
     fse.copySync(path.join(sourcePath,"control-LoRAs-rank128"), targetPath, { recursive: true });
@@ -452,7 +463,7 @@ const installControlLora = async () =>  {
     execSync(`copy "${path.join(sourcePath,"revision","*.safetensors")}" "${visionPath}"`);
     
     // Copy the workflows
-    targetPath = path.join(global.dataPath, "workflows");
+    targetPath = path.join(global.jsonData.dataPath, "workflows");
     fse.copySync(path.join(sourcePath,"comfy-control-LoRA-workflows"), targetPath, { recursive: true });
     execSync(`copy "${path.join(sourcePath,"revision","*.json")}" "${targetPath}"`);
     await fsp.rm(sourcePath, { recursive: true, force: true });
@@ -587,7 +598,7 @@ const waitForUserInput = async () => {
 }
   
 // ------------------------------------------------------------------
-global.jsonData = await utils.fetchJson('config.json');
+
 await prepareEnvironment();
 // await fetchData(global.jsonData["embeddings"]);
 showMainMenu();

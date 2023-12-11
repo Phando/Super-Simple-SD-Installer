@@ -1,4 +1,9 @@
 {
+    "rootPath":null,
+    "dataPath":null,
+    "autoPort":7860,
+    "comfyPort":7861,
+    "useNVidia":true,
     "controlnets":[
         {"type" : "git", "path":"models/controlnet", "note":"ControlNet-v1-1", "url": "https://huggingface.co/lllyasviel/ControlNet-v1-1"}
     ],
