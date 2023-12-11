@@ -1,0 +1,1 @@
+node --max-old-space-size=65216 .\app.js
