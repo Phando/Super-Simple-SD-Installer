@@ -217,7 +217,7 @@ const cycleComfyUI = async (waitTime = 180) => {
     global.childRunning = true;
     let count = 0;
     let args = ['-s', 'ComfyUI/main.py', '--windows-standalone-build', '--disable-auto-launch', '--port', global.jsonData.comfyPort];
-    if(!useNVidia){
+    if(!global.jsonData.useNVidia){
         args.push('--cpu');
     }
     
@@ -284,21 +284,42 @@ const installCustomNodes = async () => {
     // Manual Installs
     const data = utils.filterWithOptions(global.jsonData.customNodes, [{setup:"custom"}]);
     for(const item of data){
+        console.log(`Setting up: ${chalk.yellow(item.note)}`);
         let nodePath = path.join(global.jsonData.dataPath, item.path); 
-        let repoPath = await utils.cloneRepository(item.url, nodePath);
-
-        process.stdout.write(`Setting up: ${chalk.yellow(item.note)}`);
+        let repoPath = nodePath
+        
+        if(item.type == "git"){
+            repoPath = await utils.cloneRepository(item.url, nodePath);
+        }
         switch(item.note){
             case "Efficiency Nodes" : 
-                execSync(`${global.pythonPath} -m pip install simpleeval`, { encoding: 'utf8' });
+                execSync(`"${global.pythonPath}" -m pip install simpleeval`, { encoding: 'utf8' });
             break;
             case "Impact Pack" :
-                execSync(`${global.pythonPath} ${path.join(repoPath, "install.py")} -y`, { encoding: 'utf8' });
+                execSync(`"${global.pythonPath}" "${path.join(repoPath, "install.py")}" -y`, { encoding: 'utf8' });
             break;
             case "MTB" :
                 await utils.installRequirements(item);
-                execSync(`echo 1, 2, 3, 4 | ${global.pythonPath} ${path.join(repoPath, "scripts", "download_models.py")}`, { encoding: 'utf8' });
-                break;
+                execSync(`echo 1, 2, 3, 4 | "${global.pythonPath}" "${path.join(repoPath, "scripts", "download_models.py")}"`, { encoding: 'utf8' });
+            break;
+            case "Searge SDXL" :
+                await utils.downloadFile(item.url, global.currentPath)
+                    .then(filePath => utils.extractZip(filePath, global.comfyPath))
+                    .catch(error => console.error(error)); 
+                execSync(`"${path.join(global.comfyPath, "SeargeSDXL-Installer.bat")}"`, { encoding: 'utf8' });
+                execSync(`del "${path.join(global.comfyPath, "SeargeSDXL-Installer.*")}"`, { encoding: 'utf8' });
+            break
+            case "WAS Node Suite" :
+                if(!ffmpegExists()){
+                    continue;
+                }    
+                console.log("WAS", repoPath);
+                // let wasData = await utils.fetchJson('config.json');
+                // `C:\Users\Joe Andolina\genai\comfyui\ComfyUI\custom_nodes\was-node-suite-comfyui\was_suite_config.json` 
+                // set ffmpeg_bin_path to path.join(global.jsonData.rootPath, "ffmpeg")
+                // const jsonString = JSON.stringify(global.jsonData, null, 4);
+                // utils.saveFile('config.json', jsonString);
+            break;
         }
         console.log("Done");
     }  

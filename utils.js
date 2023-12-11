@@ -266,7 +266,7 @@ class Utils {
         process.chdir(nodesPath);
         try {
             console.log("Installing Requirements for:", this.getNameFrom(item.url));
-            const output = execSync(`${global.pythonPath} -s -m pip install -r requirements.txt`, { encoding: 'utf8' });
+            const output = execSync(`"${global.pythonPath}" -s -m pip install -r requirements.txt`, { encoding: 'utf8' });
         } catch (error) {
             console.error('Error occurred:', error);
         }
@@ -436,12 +436,12 @@ class Utils {
         // Mark up the url with modelFile metadata
         let downloadUrl = modelFile.downloadUrl + "?";
         if('type' in modelFile){
-            downloadUrl += "type=" + modelFile.type;
+            modelFile.metadata.type = modelFile.type;
         }
 
         if('metadata' in modelFile){
             for (const key in modelFile.metadata) {
-                if(modelFile.metadata[key] != null){
+                if(modelFile.metadata[key] != null && !downloadUrl.includes(key)){
                     downloadUrl += `&${key}=${modelFile.metadata[key]}`;
                 }  
             }
@@ -451,7 +451,17 @@ class Utils {
         fse.writeJsonSync(path.join(targetPath,`${filePrefix}.json`), metadata, { spaces: 2 });
         fse.writeJsonSync(path.join(targetPath,`${filePrefix}.civitai.info`), jsonData, { spaces: 2 });
         await this.downloadFile(modelVersion.images[0].url, targetPath, `${filePrefix}.${imageType}`);
-        await this.downloadFile(downloadUrl, targetPath, modelFile.name);
+        
+        switch(modelFile.type.toLowerCase()){
+            case "archive" :
+                await utils.downloadFile(downloadUrl, targetPath)
+                    .then(filePath => utils.extractZip(filePath, targetPath))
+                    .catch(error => console.error(error));
+            break;
+            default:
+                await this.downloadFile(downloadUrl, targetPath, modelFile.name);
+            break;
+        }
     }
 }
 
