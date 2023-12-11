@@ -203,7 +203,7 @@ const installAuto1111 = async () => {
     // Install the extensions
     let extensionsPath = path.join(applicationPath, "extensions")
     for(const item of global.jsonData.extensions){
-        utils.cloneRepository(item, extensionsPath);
+        await utils.cloneRepository(item, extensionsPath);
     }
     
     utils.saveFile(path.join(applicationPath,"webui-user.bat"), configString.replace(/\\/g, '/'));

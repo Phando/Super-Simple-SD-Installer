@@ -96,10 +96,12 @@ class Utils {
 
 // ------------------------------------------------------------------
     filterWithOptions = (sourceData, filterOptions) => {
-        if(filterOptions.length > 0){
+        if (filterOptions.length > 0) {
             return sourceData.filter(item => 
                 filterOptions.some(option => 
-                    Object.keys(option).every(key => item[key].includes(option[key]))
+                    Object.keys(option).every(key => 
+                        key in item && item[key].includes(option[key])
+                    )
                 )
             );
         }
