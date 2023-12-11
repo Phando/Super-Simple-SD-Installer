@@ -166,19 +166,19 @@ const installAuto1111 = async () => {
         set PYTHON=
         set GIT=
         set VENV_DIR=
-        set COMMANDLINE_ARGS= --xformers --update-all-extensions --port ${global.autoPort}
-        --ckpt-dir "${global.dataPath}\\models\\checkpoints"
-        --codeformer-models-path "${global.dataPath}\\models\\codeformer"
-        --controlnet-dir "${global.dataPath}\\models\\controlnet"
-        --embeddings-dir "${global.dataPath}\\models\\embeddings"
-        --esrgan-models-path "${global.dataPath}\\models\\esrgan"
-        --gfpgan-models-path "${global.dataPath}\\models\\gfpgan"
-        --hypernetwork-dir "${global.dataPath}\\models\\hypernetworks"
-        --ldsr-models-path "${global.dataPath}\\models\\ldsr"
-        --lora-dir "${global.dataPath}\\models\\loras"
-        --realesrgan-models-path "${global.dataPath}\\models\\realesrgan"
-        --swinir-models-path "${global.dataPath}\\models\\swinir"
-        --textual-inversion-templates-dir "${global.dataPath}\\models\\embeddings"
+        set COMMANDLINE_ARGS= --xformers --update-all-extensions --port ${global.autoPort} ^
+        --ckpt-dir "${global.dataPath}\\models\\checkpoints" ^
+        --codeformer-models-path "${global.dataPath}\\models\\codeformer" ^
+        --controlnet-dir "${global.dataPath}\\models\\controlnet" ^
+        --embeddings-dir "${global.dataPath}\\models\\embeddings" ^
+        --esrgan-models-path "${global.dataPath}\\models\\esrgan" ^
+        --gfpgan-models-path "${global.dataPath}\\models\\gfpgan" ^
+        --hypernetwork-dir "${global.dataPath}\\models\\hypernetworks" ^
+        --ldsr-models-path "${global.dataPath}\\models\\ldsr" ^
+        --lora-dir "${global.dataPath}\\models\\loras" ^
+        --realesrgan-models-path "${global.dataPath}\\models\\realesrgan" ^
+        --swinir-models-path "${global.dataPath}\\models\\swinir" ^
+        --textual-inversion-templates-dir "${global.dataPath}\\models\\embeddings" ^
         --vae-dir "${global.dataPath}\\models\\vae"`
 
     console.log(utils.getNameFrom(global.jsonData.autoInstallerUrl));
