@@ -432,11 +432,26 @@ class Utils {
             }    
         });
 
+        
+        // Mark up the url with modelFile metadata
+        let downloadUrl = modelFile.downloadUrl + "?";
+        if('type' in modelFile){
+            downloadUrl += "type=" + modelFile.type;
+        }
+
+        if('metadata' in modelFile){
+            for (const key in modelFile.metadata) {
+                if(modelFile.metadata[key] != null){
+                    downloadUrl += `&${key}=${modelFile.metadata[key]}`;
+                }  
+            }
+        }
+        
         // Download the data and save generated files to disk
         fse.writeJsonSync(path.join(targetPath,`${filePrefix}.json`), metadata, { spaces: 2 });
         fse.writeJsonSync(path.join(targetPath,`${filePrefix}.civitai.info`), jsonData, { spaces: 2 });
         await this.downloadFile(modelVersion.images[0].url, targetPath, `${filePrefix}.${imageType}`);
-        await this.downloadFile(modelVersion.downloadUrl, targetPath, modelFile.name);
+        await this.downloadFile(downloadUrl, targetPath, modelFile.name);
     }
 }
 
