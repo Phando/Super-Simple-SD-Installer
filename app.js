@@ -310,7 +310,7 @@ const installCustomNodes = async () => {
                 execSync(`del "${path.join(global.comfyPath, "SeargeSDXL-Installer.*")}"`, { encoding: 'utf8' });
             break
             case "WAS Node Suite" :
-                if(!ffmpegExists()){
+                if(!utils.ffmpegExists()){
                     continue;
                 }    
                 console.log("WAS", repoPath);
