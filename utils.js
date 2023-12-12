@@ -121,7 +121,7 @@ class Utils {
             }
         } catch (error) {
             console.error('Error loading JSON:', error);
-            throw error; // Rethrow the error for the caller to handle, if needed
+            return null;
         }
     }
 
@@ -264,7 +264,7 @@ class Utils {
 
 // ------------------------------------------------------------------
     installRequirements = async (item) => {
-        let nodesPath = path.join(global.jsonData.dataPath, item.path, this.getNameFrom(item.url)); 
+        let nodesPath = path.join(global.prefs.dataPath, item.path, this.getNameFrom(item.url)); 
         process.chdir(nodesPath);
         try {
             console.log("Installing Requirements for:", this.getNameFrom(item.url));
@@ -380,7 +380,7 @@ class Utils {
 // ------------------------------------------------------------------
     downloadCivitai = async (item) => {
         console.log(`Fetching metadata for model:${chalk.yellow(item.note)} id:${chalk.yellow(item.modelId)}`);
-        const targetPath = path.join(global.jsonData.dataPath, item.path);
+        const targetPath = path.join(global.prefs.dataPath, item.path);
         const jsonData = await this.fetchJson(`https://civitai.com/api/v1/models/${item.modelId}`);
 
         const modelVersion = this.getModelVersion(jsonData, item);

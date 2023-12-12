@@ -1,9 +1,4 @@
 {
-    "rootPath": null,
-    "dataPath": null,
-    "autoPort": 7860,
-    "comfyPort": 7861,
-    "useNVidia": true,
     "controlnets": [
         {
             "type": "git",
