@@ -103,7 +103,7 @@ const onyxFix = async () => {
         return        
     }
     
-    const output = execSync(`${global.pythonPath} -c "import torch; print(torch.__version__); print(torch.version.cuda)"`, { encoding: 'utf8' });
+    const output = execSync(`"${global.pythonPath}" -c "import torch; print(torch.__version__); print(torch.version.cuda)"`, { encoding: 'utf8' });
     if(output.includes("11.8")){
         console.log(chalk.magenta(`\nThe proper version of ${chalk.yellow("Cuda for OnyxRuntime")} is installed.\n`));    
         return;
@@ -113,9 +113,9 @@ const onyxFix = async () => {
     console.log("");
     if(performFix){
         console.log("Fixing Cuda and OnyxRuntime...");
-        execSync(`${global.pythonPath} -m pip uninstall torch torchvision torchaudio -y`, { encoding: 'utf8' });
-        execSync(`${global.pythonPath} -m pip install torch==2.1.1+cu118 torchvision==0.16.1+cu118 torchaudio==2.1.1+cu118 -f https://download.pytorch.org/whl/torch_stable.html`, { encoding: 'utf8' });
-        execSync(`${global.pythonPath} -m pip install onnxruntime-gpu`, { encoding: 'utf8' });
+        execSync(`"${global.pythonPath}" -m pip uninstall torch torchvision torchaudio -y`, { encoding: 'utf8' });
+        execSync(`"${global.pythonPath}" -m pip install torch==2.1.1+cu118 torchvision==0.16.1+cu118 torchaudio==2.1.1+cu118 -f https://download.pytorch.org/whl/torch_stable.html`, { encoding: 'utf8' });
+        execSync(`"${global.pythonPath}" -m pip install onnxruntime-gpu`, { encoding: 'utf8' });
         await onyxFix();
     }
 }   
