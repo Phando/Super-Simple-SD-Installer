@@ -631,7 +631,8 @@ const waitForUserInput = async () => {
 
 await prepareEnvironment();
 // await fetchData(global.jsonData["embeddings"]);
-showMainMenu();
-await waitForUserInput();
+await utils.fetchJson(`https://civitai.com/api/v1/models/257448`)
+//showMainMenu();
+//await waitForUserInput();
 
 console.log("Happy Generating\n");

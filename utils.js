@@ -120,7 +120,11 @@ class Utils {
                 return JSON.parse(data);
             }
         } catch (error) {
-            console.error('Error loading JSON:', error);
+            console.error('Error loading JSON:');//, error);
+            const errorJson = JSON.parse(error);
+            if("config" in errorJson){
+                console.log(error.config);
+            }
             return null;
         }
     }
