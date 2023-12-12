@@ -192,6 +192,12 @@
             "note": "Turbo Unstable Diffusers",
             "modelId": 84040,
             "versionId": 247214
+        },
+        {
+            "type": "civitai",
+            "path": "models/checkpoints",
+            "note": "PsyFi XL",
+            "modelId": 257448
         }
     ],
     "customNodes": [
