@@ -142,7 +142,7 @@ const prepareEnvironment = async () => {
     global.autoPath = path.join(global.jsonData.rootPath, "auto1111")
     global.comfyPath = path.join(global.jsonData.rootPath, "comfyui")
     global.pythonPath = path.join(global.comfyPath,"python_embeded/python.exe");
-
+    
     const jsonString = JSON.stringify(global.jsonData, null, 4);
     utils.saveFile('config.json', jsonString);
 
