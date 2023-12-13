@@ -8,13 +8,23 @@ import Seven from 'node-7z'
 import sevenBin from '7zip-bin'
 import path from 'path';
 import readline from 'readline';
-import { simpleGit, CleanOptions } from 'simple-git';
 
-// simpleGit().clean(CleanOptions.FORCE);
+const validTypes = ["model","negative","archive"];
+const versionFields = [
+    {match:"baseModel", target:"baseModel"},
+    {match:"description", target:"notes"},
+    {match:"name", target:"versionName"},
+    {match:"type", target:"type"},
+    {match:"trainedWords", target:"trainedWords"}]
 
 class Utils {
     blank = ' '.repeat(175);
     pathTo7zip = sevenBin.path7za
+
+    // ------------------------------------------------------------------
+    pathToRepo(item) {
+        return path.join(global.prefs.dataPath, item.path, this.getNameFrom(item.url)); 
+    }
 
     // ------------------------------------------------------------------
     addToSystemPath = (targetPath) => {
@@ -120,11 +130,7 @@ class Utils {
                 return JSON.parse(data);
             }
         } catch (error) {
-            console.error('Error loading JSON:');//, error);
-            const errorJson = JSON.parse(error);
-            if("config" in errorJson){
-                console.log(error.config);
-            }
+            console.log(chalk.red('FetchJson Error - Request Config:'), error.config);
             return null;
         }
     }
@@ -228,47 +234,9 @@ class Utils {
     }
 
 
-// ------------------------------------------------------------------
-    extractZip = async (filePath, outputPath) => {
-        if(!filePath.includes(".zip") && !filePath.includes(".7z")){
-            return;
-        }
-
-        try {
-            global.extracting = true;
-            console.log("Extracting:", filePath);
-            const result  = Seven.extractFull(filePath, outputPath, {
-                $bin: this.pathTo7zip,
-                $recursive: true
-            })
-
-            result.on('data', (data) => {
-                process.stdout.write(`\r${this.blank}`);    
-                process.stdout.write(`\rExtracting: ${data.file}`);
-            });
-            
-            result.on('end', () => {
-                process.stdout.write(`\r${this.blank}`);
-                fse.removeSync(filePath);
-                global.extracting = false;
-            });
-
-            while(global.extracting){
-                await this.delay(2000);
-            }
-
-            await this.delay(1000);
-            console.log('\nExtraction finished\n');
-        }
-        catch (error) {
-            global.extracting = false;
-            throw new Error(`Error extracting files: ${error}`);
-        }
-    }
-
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
     installRequirements = async (item) => {
-        let nodesPath = path.join(global.prefs.dataPath, item.path, this.getNameFrom(item.url)); 
+        let nodesPath = this.pathToRepo(item);
         process.chdir(nodesPath);
         try {
             console.log("Installing Requirements for:", this.getNameFrom(item.url));
@@ -358,63 +326,46 @@ class Utils {
         }
     }
 
+
 // ------------------------------------------------------------------
-    getModelVersion(jsonData, item) {
-        let modelVersion = null;
-        if (jsonData.modelVersions && jsonData.modelVersions.length > 0) {
-            if('versionId' in item){
-                modelVersion = jsonData.modelVersions.filter(version => version.id === item.versionId)[0];
-            }
-            else {
-                modelVersion = jsonData.modelVersions[0];
-            }
+    extractZip = async (filePath, outputPath) => {
+        if(!filePath.includes(".zip") && !filePath.includes(".7z")){
+            return;
         }
-        return modelVersion;
+
+        try {
+            global.extracting = true;
+            console.log("Extracting:", filePath);
+            const result  = Seven.extractFull(filePath, outputPath, {
+                $bin: this.pathTo7zip,
+                $recursive: true
+            })
+
+            result.on('data', (data) => {
+                process.stdout.write(`\rExtracting: ${data.file.padEnd(80, ' ')}`);
+            });
+            
+            result.on('end', () => {
+                fse.removeSync(filePath);
+                global.extracting = false;
+            });
+
+            while(global.extracting){
+                await this.delay(2000);
+            }
+
+            await this.delay(1000);
+            console.log(`\rExtraction ${"complete".padEnd(80,' ')}\n`);
+        }
+        catch (error) {
+            global.extracting = false;
+            throw new Error(`Error extracting files: ${error}`);
+        }
     }
 
-// ------------------------------------------------------------------
-    getVersionFile(modelVersion) {
-        const validFiles = ["model","negative","archive"];
-         if (modelVersion.files && modelVersion.files.length > 0) {
-           return modelVersion.files.find(file => validFiles.includes(file.type.toLowerCase()));
-        }
-        return null;
-    }
 
 // ------------------------------------------------------------------
-    downloadCivitai = async (item) => {
-        console.log(`Fetching metadata for model:${chalk.yellow(item.note)} id:${chalk.yellow(item.modelId)}`);
-        const targetPath = path.join(global.prefs.dataPath, item.path);
-        const jsonData = await this.fetchJson(`https://civitai.com/api/v1/models/${item.modelId}`);
-
-        const modelVersion = this.getModelVersion(jsonData, item);
-        if(!modelVersion){
-            console.log(chalk.red(`Unable to find metadata for model id:${chalk.yellow(item.note)}`));
-            return;
-        }
-        
-        const modelFile = this.getVersionFile(modelVersion);
-        if(!modelFile){
-            console.log(chalk.red(`Fetching metadata failed model:${chalk.red(item.note)} id: ${chalk.red(item.modelId)}`));
-            return;
-        }
-        if(fs.existsSync(path.join(targetPath,modelFile.name))){
-            console.log(`${chalk.yellow(modelFile.name)} already exists in:${chalk.yellow(targetPath)}`);
-            return;
-        }
-
-        console.log(chalk.magenta("Downloading:", Math.floor(modelFile.sizeKB / 1024),"mb...\n"));
-        if(modelFile.type.toLowerCase() == "archive"){
-            await utils.downloadFile(modelVersion.downloadUrl, global.currentPath)
-                .then(filePath => utils.extractZip(filePath, targetPath))
-                .catch(error => console.error(error));    
-            return;
-        }
-        
-        // Past the sanity checks, prep the data
-        let filePrefix = modelFile.name.split('.')[0];
-        let imageType = this.getTypeFrom(modelVersion.images[0].url);
-        
+    getVersionInfo = (modelVersion) => {
         let metadata = {
             description:jsonData.description,
             name:jsonData.name,
@@ -426,48 +377,97 @@ class Utils {
             }
         }
         
-        const versionFields = [
-            {match:"baseModel", target:"baseModel"},
-            {match:"description", target:"notes"},
-            {match:"name", target:"versionName"},
-            {match:"trainedWords", target:"trainedWords"}]
-
         versionFields.forEach((item) => {
             if(modelVersion[item.match]){
                 metadata[item.target] = modelVersion[item.match];
             }    
         });
 
+        return metadata;
+    }
+
+// ------------------------------------------------------------------
+    getVersionFile = (modelVersion) => {
+        if (!modelVersion.files || modelVersion.files.length == 0) {
+            return null;
+        }
         
-        // Mark up the url with modelFile metadata
-        let downloadUrl = modelFile.downloadUrl + "?";
-        if('type' in modelFile){
-            modelFile.metadata.type = modelFile.type;
+        let versionFile = modelVersion.files.find(file => validTypes.includes(file.type.toLowerCase()));
+        versionFile.filePrefix = versionFile.name.split('.')[0];
+        versionFile.imageType = this.getTypeFrom(modelVersion.images[0].url);
+        versionFile.imageUrl = modelVersion.images[0].url;
+        
+        // Mark up the url with versionFile metadata
+        let downloadUrl = versionFile.downloadUrl + "?";
+        if('type' in versionFile){
+            versionFile.metadata.type = versionFile.type;
         }
 
-        if('metadata' in modelFile){
-            for (const key in modelFile.metadata) {
-                if(modelFile.metadata[key] != null && !downloadUrl.includes(key)){
-                    downloadUrl += `&${key}=${modelFile.metadata[key]}`;
+        if('metadata' in versionFile){
+            for (const key in versionFile.metadata) {
+                if(versionFile.metadata[key] != null && !downloadUrl.includes(key)){
+                    downloadUrl += `&${key}=${versionFile.metadata[key]}`;
                 }  
             }
         }
-        
-        // Download the data and save generated files to disk
-        fse.writeJsonSync(path.join(targetPath,`${filePrefix}.json`), metadata, { spaces: 2 });
-        fse.writeJsonSync(path.join(targetPath,`${filePrefix}.civitai.info`), jsonData, { spaces: 2 });
-        await this.downloadFile(modelVersion.images[0].url, targetPath, `${filePrefix}.${imageType}`);
-        
-        switch(modelFile.type.toLowerCase()){
-            case "archive" :
-                await utils.downloadFile(downloadUrl, targetPath)
-                    .then(filePath => utils.extractZip(filePath, targetPath))
-                    .catch(error => console.error(error));
-            break;
-            default:
-                await this.downloadFile(downloadUrl, targetPath, modelFile.name);
-            break;
+
+        versionFile.downloadUrl = downloadUrl;
+        return versionFile;
+    }
+
+
+// ------------------------------------------------------------------
+    getModelVersion = async (item) => {
+        console.log(`Fetching metadata for model:${chalk.yellow(item.note)} id:${chalk.yellow(item.modelId)}`);
+        const jsonData = await this.fetchJson(`https://civitai.com/api/v1/models/${item.modelId}`);
+
+        if(!jsonData || !jsonData.modelVersions || jsonData.modelVersions.length == 0){
+            return null;
         }
+        
+        let modelVersion = jsonData.modelVersions[0];
+        if('versionId' in item){
+            modelVersion = jsonData.modelVersions.filter(version => version.id === item.versionId)[0];
+        }
+        
+        return modelVersion;
+    }
+
+
+// ------------------------------------------------------------------
+    downloadCivitai = async (item) => {
+        const targetPath = path.join(global.prefs.dataPath, item.path);
+        const modelVersion = await this.getModelVersion(item);
+        if(!modelVersion){
+            console.log(chalk.red(`Unable to find metadata for model:${chalk.yellow(item.note)}\n`));
+            return;
+        }
+        
+        const versionFile = this.getVersionFile(modelVersion);
+        if(!versionFile){
+            console.log(chalk.red(`Unable to find file version for model:${chalk.yellow(modelVersion.name)}\n`));
+            return;
+        }
+
+        if(fs.existsSync(path.join(targetPath, versionFile.name))){
+            console.log(`${chalk.yellow(versionFile.name)} already exists in:${chalk.yellow(targetPath)}\n`);
+            return;
+        }
+
+        // Download the data and save generated files to disk
+        console.log(chalk.magenta("Downloading:", Math.floor(versionFile.sizeKB / 1024),"mb...\n"));
+        if(versionFile.type.toLowerCase() == "archive"){
+            await utils.downloadFile(versionFile.downloadUrl, global.currentPath)
+                .then(filePath => utils.extractZip(filePath, targetPath))
+                .catch(error => console.error(error));    
+            return;
+        }
+        
+        const versionInfo = this.getVersionInfo(modelVersion);
+        fse.writeJsonSync(path.join(targetPath,`${versionFile.filePrefix}.json`), versionInfo, { spaces: 2 });
+        fse.writeJsonSync(path.join(targetPath,`${versionFile.filePrefix}.civitai.info`), jsonData, { spaces: 2 });
+        await this.downloadFile(versionFile.imageUrl, targetPath, `${versionFile.filePrefix}.${versionFile.imageType}`);
+        await this.downloadFile(versionFile.downloadUrl, targetPath, versionFile.name);
     }
 }
 

@@ -17,7 +17,9 @@ Thank you to everyone in the community for your contributions, creativity and sk
 - FFMpeg Installer, needs to be run as admin
 - Custom Node Installer
 - Data Loader - controlnets, checkpoints, embeddings, loras, workflows, and vaes
-- Control-Lora & Clip-Vision installer (Optional ~170g)
+- Clip Vision Installer (Optional)
+- Control-Lora Installer (Optional)
+- IP Adapter Installer (Optional)
 - Onyx Runtime Fix
 - Civitai metadata and image generation
 
@@ -45,6 +47,7 @@ genai_data/
 │  ├─ checkpoints/
 │  ├─ classifiers/
 │  ├─ clip/
+│  ├─ clip_vision/
 │  ├─ codeformer/
 │  ├─ configs/
 │  ├─ controlnet/
@@ -57,6 +60,7 @@ genai_data/
 │  ├─ gfpgan/
 │  ├─ hypernetworks/
 │  ├─ insightface/
+│  ├─ ipadapter/
 │  ├─ ldsr/
 │  ├─ loras/
 │  ├─ lycoris/
@@ -105,10 +109,12 @@ Or you can run the command the is inside the installSD.bat file
 ### Typical Operation
 1. Install Auto1111 (optional?)
 2. Install ComfyUI
-3. Install FFMpeg
-4. Install the Custom Nodes
-5. Load Models
+3. Install the Custom Nodes
+4. Load Models
 
 ### Optional Operations
-6. Install Control-Lora & Clip-Vision (Optional ~170g)
-7. Onyx Runtime Fix
+5. Install FFMpeg
+6. Install Clip-Vision
+7. Install Control-Lora
+8. Install IPAdapter
+9. Onyx Runtime Fix

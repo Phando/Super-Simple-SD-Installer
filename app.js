@@ -5,6 +5,9 @@ import fse from 'fs-extra';
 import fsp from 'fs/promises';
 import path from 'path';
 import utils from './utils.js';
+// import { test } from 'node-7z';
+import largeInstaller from './installers/largeInstaller.js';
+import nodeInstaller from './installers/nodeInstaller.js';
 
 global.prefs = {
     "rootPath": null,
@@ -21,6 +24,7 @@ const directories = [
     "models/checkpoints",
     "models/classifiers",
     "models/clip",
+    "models/clip_vision",
     "models/codeformer",
     "models/configs",
     "models/controlnet",
@@ -29,6 +33,7 @@ const directories = [
     "models/esrgan",
     "models/gfpgan",
     "models/hypernetworks",
+    "models/ipadapter",
     "models/ldsr",
     "models/loras",
     "models/lycoris",
@@ -290,46 +295,17 @@ const installCustomNodes = async () => {
     await fetchData(global.jsonData.customNodes, [{setup:"basic"}]);
     await cycleComfyUI();
 
-    // Manual Installs
+    // Custom Installs
     const data = utils.filterWithOptions(global.jsonData.customNodes, [{setup:"custom"}]);
     for(const item of data){
         console.log(`Setting up: ${chalk.yellow(item.note)}`);
         let nodePath = path.join(global.prefs.dataPath, item.path); 
-        let repoPath = nodePath
         
         if(item.type == "git"){
-            repoPath = await utils.cloneRepository(item.url, nodePath);
+            await utils.cloneRepository(item.url, nodePath);
         }
-        switch(item.note){
-            case "Efficiency Nodes" : 
-                execSync(`"${global.pythonPath}" -m pip install simpleeval`, { encoding: 'utf8' });
-            break;
-            case "Impact Pack" :
-                execSync(`"${global.pythonPath}" "${path.join(repoPath, "install.py")}" -y`, { encoding: 'utf8' });
-            break;
-            case "MTB" :
-                await utils.installRequirements(item);
-                execSync(`echo 1, 2, 3, 4 | "${global.pythonPath}" "${path.join(repoPath, "scripts", "download_models.py")}"`, { encoding: 'utf8' });
-            break;
-            case "Searge SDXL" :
-                await utils.downloadFile(item.url, global.currentPath)
-                    .then(filePath => utils.extractZip(filePath, global.comfyPath))
-                    .catch(error => console.error(error)); 
-                execSync(`"${path.join(global.comfyPath, "SeargeSDXL-Installer.bat")}"`, { encoding: 'utf8' });
-                execSync(`del "${path.join(global.comfyPath, "SeargeSDXL-Installer.*")}"`, { encoding: 'utf8' });
-            break
-            case "WAS Node Suite" :
-                if(!utils.ffmpegExists()){
-                    continue;
-                }    
-                console.log("WAS", repoPath);
-                // let wasData = await utils.fetchJson('config.json');
-                // `C:\Users\Joe Andolina\genai\comfyui\ComfyUI\custom_nodes\was-node-suite-comfyui\was_suite_config.json` 
-                // set ffmpeg_bin_path to path.join(global.prefs.rootPath, "ffmpeg")
-                // const jsonString = JSON.stringify(global.jsonData, null, 4);
-                // utils.saveFile('config.json', jsonString);
-            break;
-        }
+
+        await nodeInstaller[item.installer](item);
         console.log("Done");
     }  
 
@@ -443,7 +419,6 @@ const installComfyUI = async () => {
     }
 }
 
-
 // ------------------------------------------------------------------
 const installFFMpeg = async () => {
     if(utils.ffmpegExists()){
@@ -463,47 +438,26 @@ const installFFMpeg = async () => {
     console.log(`Install complete: ${chalk.yellow("FFMpeg")}`);
 }
 
-
 // ------------------------------------------------------------------
-const installControlLora = async () =>  {
-    if(!fs.existsSync(global.comfyPath)){
-        console.log(chalk.red(`\n${chalk.yellow("ComfyUI")} is required before Control-Lora can be installed.\nNot found in: ${chalk.yellow(global.comfyPath)} `));
+const largeInstalls = async () => {
+    let index = 1;
+    console.log(chalk.yellow('\nInstall:'));
+    jsonData.largeInstalls.forEach((item) => {
+        console.log(`${chalk.yellow(index)}. ${item.name} ~${item.size}g`);
+        index++;
+    });
+
+    console.log(`${chalk.yellow(index)}. Back`);
+    index = await utils.promptUser('Enter your choice');
+    index = parseInt(index, 10) - 1;
+    if(index >= global.jsonData.largeInstalls.length){
         return;
     }
-
-    let visionPath = path.join(global.prefs.dataPath, "models/clip_vision");
     
-    if(fs.existsSync(visionPath)){
-        console.log(chalk.magenta("\nControl-Lora already installed."));
-        return;
+    const item = global.jsonData.largeInstalls[index];
+    if (largeInstaller.hasOwnProperty(item.installer)) {
+        await largeInstaller[item.installer](item);
     }
-
-    console.log(chalk.magenta("\nControl-Lora not installed. Downloading and installing Control-Lora... ~70g"));
-
-    // Copy the controlnets
-    let sourcePath = await utils.cloneRepository(global.jsonData.controlLora, global.currentPath)
-    let targetPath = path.join(global.prefs.dataPath, "models", "controlnet");
-
-    console.log("sourcePath", sourcePath, targetPath);
-    fse.copySync(path.join(sourcePath,"control-LoRAs-rank128"), targetPath, { recursive: true });
-    fse.copySync(path.join(sourcePath,"control-LoRAs-rank256"), targetPath, { recursive: true });
-    
-    // Copy the vision_clip models
-    utils.makeDir(visionPath);
-    execSync(`copy "${path.join(sourcePath,"revision","*.safetensors")}" "${visionPath}"`);
-    
-    // Copy the workflows
-    targetPath = path.join(global.prefs.dataPath, "workflows");
-    fse.copySync(path.join(sourcePath,"comfy-control-LoRA-workflows"), targetPath, { recursive: true });
-    execSync(`copy "${path.join(sourcePath,"revision","*.json")}" "${targetPath}"`);
-    await fsp.rm(sourcePath, { recursive: true, force: true });
-    
-    // Copy the vision_clip models
-    console.log(chalk.magenta("\nDownloading and installing UnClip... ~100g"));
-    sourcePath = await utils.cloneRepository(global.jsonData.unclip, global.currentPath)
-    execSync(`copy "${path.join(sourcePath,"*.safetensors")}" "${visionPath}"`);
-    await fsp.rm(sourcePath, { recursive: true, force: true });
-    console.log(`Install complete: ${chalk.yellow("Control Lora")}`);
 }
 
 // ------------------------------------------------------------------
@@ -541,10 +495,11 @@ const loadModels = async () => {
     console.log(`Install complete: ${chalk.yellow("Model Data")}`);
 }
 
+
 // ------------------------------------------------------------------
 
 const showModelMenu = () => {
-    console.log(chalk.yellow('\n\nInstall for:'));
+    console.log(chalk.yellow('\nInstall for:'));
     console.log(`${chalk.yellow('1')}. SD`);
     console.log(`${chalk.yellow('2')}. SDXL`);
     console.log(`${chalk.yellow('3')}. SD and SDXL`);
@@ -554,14 +509,14 @@ const showModelMenu = () => {
 // ------------------------------------------------------------------
 
 const showMainMenu = () => {
-    console.log(chalk.yellow('\n\nChoose an option:'));
+    console.log(chalk.gray("\nData from config.json"));
+    console.log(chalk.yellow('Choose an option:'));
     console.log(`${chalk.yellow('1')}. Install Automatic1111`);
     console.log(`${chalk.yellow('2')}. Install ComfyUI`);
-    console.log(`${chalk.yellow('3')}. Install FFMpeg (admin)` );
-    console.log(`${chalk.yellow('4')}. Install Custom Nodes`);
-    console.log(`${chalk.yellow('5')}. Load Models (config.json)`);
-    console.log(`${chalk.yellow('6')}. Install Control-Lora & Clip-Vision (Optional ~170g)`);
-    // console.log(`${chalk.yellow('7')}. Comfy Data Fix (needed after update)`);
+    console.log(`${chalk.yellow('3')}. Install Custom Nodes`);
+    console.log(`${chalk.yellow('4')}. Load Models...`);
+    console.log(`${chalk.yellow('5')}. Large Installs...`);
+    console.log(`${chalk.yellow('6')}. Install FFMpeg (admin)` );
     console.log(`${chalk.yellow('7')}. Onyx Runtime Fix`);
     console.log(`${chalk.yellow('8')}. Exit`);
 }
@@ -569,7 +524,7 @@ const showMainMenu = () => {
 // ------------------------------------------------------------------
 
 const handleUserInput = async (input) => {
-    const admin = ['3'];
+    const admin = ['6'];
     input = input.trim();
     
     if(admin.includes(input) && !utils.isAdministrator()){
@@ -590,20 +545,17 @@ const handleUserInput = async (input) => {
             await installComfyUI();
         break;
         case '3':
-            await installFFMpeg();
-        break;
-        case '4':
             await installCustomNodes();
         break;
-        case '5':
+        case '4':
             await loadModels();
         break;
-        case '6':
-            await installControlLora();
+        case '5':
+            await largeInstalls();
         break;
-        // case '7':
-        //     await comfyDataFix();
-        // break;
+        case '6':
+            await installFFMpeg();
+        break;
         case '7':
             await onyxFix();
         break;
@@ -631,8 +583,8 @@ const waitForUserInput = async () => {
 
 await prepareEnvironment();
 // await fetchData(global.jsonData["embeddings"]);
-await utils.fetchJson(`https://civitai.com/api/v1/models/257448`)
-//showMainMenu();
-//await waitForUserInput();
+// await utils.fetchJson(`https://civitai.com/api/v1/models/257448`)
 
+showMainMenu();
+await waitForUserInput();
 console.log("Happy Generating\n");

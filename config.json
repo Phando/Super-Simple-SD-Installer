@@ -18,73 +18,74 @@
     "checkpoints": [
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "GhostMIX",
             "modelId": 36520
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "RPG Style",
             "modelId": 1116
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "RPG Inpainting",
             "modelId": 90365
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Absolute Reality",
             "modelId": 81458
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Analog Madness",
             "modelId": 8030
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Cartoon 3D",
             "modelId": 129990
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Dreamshaper 8",
             "modelId": 4384
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Magic Mix Fantasy",
             "modelId": 41865
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Endless Reality",
             "modelId": 25573
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "FaeTastic",
-            "modelId": 14065
+            "modelId": 14065,
+            "versionId": 105796
         },
         {
             "type": "get",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Deliberate",
             "url": "https://huggingface.co/XpucT/Deliberate/resolve/main/Deliberate_v4%20(SFW).safetensors?download:true"
         },
         {
             "type": "get",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sd",
             "note": "Deliberate For Inpainting",
             "url": "https://huggingface.co/XpucT/Deliberate/resolve/main/Deliberate_v4%20(SFW)-inpainting.safetensors?download:true"
         }
@@ -92,107 +93,120 @@
     "checkpointsXL": [
         {
             "type": "get",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "XL - Base Refiner",
             "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors?download:true"
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "XL - Base",
             "modelId": 101055
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "MOHAWK",
             "modelId": 144952
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "DevlishPhotoRealism",
             "modelId": 156061
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "Gleipnir",
             "modelId": 175094
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "CineVisionXL",
             "modelId": 188208
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "FenrisXL",
             "modelId": 122793
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "BrightProtoNuke",
             "modelId": 148871
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "AlbedoBase XL",
             "modelId": 140737
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
-            "note": "FaeTastic",
+            "path": "models/checkpoints/sdxl",
+            "note": "FaeTasticXL",
             "modelId": 129681,
-            "versionId": 75281
+            "versionId": 183500
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "LoveXL",
             "modelId": 153202
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "Starlight XL Animated",
             "modelId": 143043
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "Yamer's Cartoon Arcadi",
             "modelId": 136113
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "Dreamshaper XL",
             "modelId": 112902
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "Crystal Clear",
             "modelId": 122822
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "Turbo Unstable Diffusers",
             "modelId": 84040,
             "versionId": 247214
         },
         {
             "type": "civitai",
-            "path": "models/checkpoints",
+            "path": "models/checkpoints/sdxl",
             "note": "PsyFi XL",
-            "modelId": 257448
+            "modelId": 228162
+        },
+        {
+            "type": "civitai",
+            "path": "models/checkpoints/sdxl",
+            "note": "Juggernaut XL",
+            "modelId": 133005,
+            "versionId":240840
+        },
+        {
+            "type": "get",
+            "path": "models/checkpoints/sdxl",
+            "note": "sd_xl_refiner_1.0",
+            "url": "https://huggingface.co/stabilityai/stable-diffusion-xl-refiner-1.0/resolve/main/sd_xl_refiner_1.0.safetensors?download=true"
         }
     ],
     "customNodes": [
@@ -278,13 +292,7 @@
             "type": "git",
             "path": "custom_nodes",
             "setup": "custom",
-            "note": "WAS Node Suite",
-            "url": "https://github.com/WASasquatch/was-node-suite-comfyui.git"
-        },
-        {
-            "type": "git",
-            "path": "custom_nodes",
-            "setup": "custom",
+            "installer": "efficiencyInstaller",
             "note": "Efficiency Nodes",
             "url": "https://github.com/jags111/efficiency-nodes-comfyui.git"
         },
@@ -292,6 +300,7 @@
             "type": "git",
             "path": "custom_nodes",
             "setup": "custom",
+            "installer": "impactInstaller",
             "note": "Impact Pack",
             "url": "https://github.com/ltdrdata/ComfyUI-Impact-Pack.git"
         },
@@ -299,6 +308,7 @@
             "type": "git",
             "path": "custom_nodes",
             "setup": "custom",
+            "installer": "mtbInstaller",
             "note": "MTB",
             "url": "https://github.com/melMass/comfy_mtb.git"
         },
@@ -306,8 +316,17 @@
             "type": "zip",
             "path": "custom_nodes",
             "setup": "custom",
+            "installer": "seargeInstaller",
             "note": "Searge SDXL",
             "url": "https://github.com/SeargeDP/SeargeSDXL/releases/download/v3.999/SeargeSDXL-Installer.zip"
+        },
+        {
+            "type": "git",
+            "path": "custom_nodes",
+            "setup": "custom",
+            "installer": "wasInstaller",
+            "note": "WAS Node Suite",
+            "url": "https://github.com/WASasquatch/was-node-suite-comfyui.git"
         }
     ],
     "detectors": [
@@ -550,15 +569,45 @@
         {
             "type": "get",
             "path": "models/vae",
+            "note": "vae-ft-ema-560000-ema-pruned",
+            "url": "https://huggingface.co/stabilityai/sd-vae-ft-ema-original/resolve/main/vae-ft-ema-560000-ema-pruned.safetensors?download=true"
+        },
+        {
+            "type": "get",
+            "path": "models/vae",
+            "note": "vae-ft-mse-840000-ema-pruned",
+            "url": "https://huggingface.co/stabilityai/sd-vae-ft-mse-original/resolve/main/vae-ft-mse-840000-ema-pruned.safetensors?download=true"
+        },
+        {
+            "type": "get",
+            "path": "models/vae",
             "note": "SDXL",
             "url": "https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors?download=true"
         }
     ],
+    "largeInstalls":[
+        {
+            "name": "Clip Vision",
+            "installer": "unclipInstaller",
+            "path": "models/clip_vision",
+            "modelUrl": "https://huggingface.co/comfyanonymous/wd-1.5-beta3_unCLIP",
+            "size": 75
+        },
+        { 
+            "name":"Control-Lora",
+            "installer": "controlLoraInstaller",
+            "modelUrl": "https://huggingface.co/stabilityai/control-lora",
+            "size": 70
+        },
+        {
+            "name": "IPAdapter",
+            "installer": "ipadapterInstaller",
+            "nodeUrl":"https://github.com/cubiq/ComfyUI_IPAdapter_plus.git",
+            "modelUrl":"https://huggingface.co/h94/IP-Adapter",
+            "size": 10
+        }
+    ],
     "ffmpegInstallUrl": "https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-full.7z",
     "autoInstallerUrl": "https://github.com/AUTOMATIC1111/stable-diffusion-webui/releases/download/v1.0.0-pre/sd.webui.zip",
-    "comfyInstallerUrl": "https://github.com/comfyanonymous/ComfyUI/releases/download/latest/ComfyUI_windows_portable_nvidia_cu121_or_cpu.7z",
-    "stabilityMatrixInstallUrl": "https://github.com/LykosAI/StabilityMatrix.git",
-    "controlLora": "https://huggingface.co/stabilityai/control-lora",
-    "unclip": "https://huggingface.co/comfyanonymous/wd-1.5-beta3_unCLIP",
-    "zipInstallUrl": "https://7-zip.org/a/7z2301-x64.exe"
+    "comfyInstallerUrl": "https://github.com/comfyanonymous/ComfyUI/releases/download/latest/ComfyUI_windows_portable_nvidia_cu121_or_cpu.7z"
 }
