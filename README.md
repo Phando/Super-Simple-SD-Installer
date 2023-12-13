@@ -31,6 +31,7 @@ This file contains lists of civitai models, git repos, and urls. Feel free to ed
 The default location for the appications and data are in path_to_script/genai and path_to_script/genai_data respectively. The locations can be changed during the install.
 
 ### Applications 
+```
 genai/
 ├─ auto1111/
 │  ├─ system/
@@ -39,8 +40,10 @@ genai/
 │  ├─ python_embedded/
 │  ├─ ComfyUI/
 │  ├─ update/
-
+├─ ffmpeg/ (optional)
+```
 ### Data
+```
 genai_data/
 ├─ custom_nodes/
 ├─ models/
@@ -77,6 +80,7 @@ genai_data/
 │  ├─ vae_approx/
 ├─ output/
 ├─ workflows/
+```
 
 ## Prerequisites
 
@@ -107,14 +111,14 @@ Or you can run the command the is inside the installSD.bat file
 `node --max-old-space-size=65216 .\app.js`
 
 ### Typical Operation
-1. Install Auto1111 (optional?)
-2. Install ComfyUI
-3. Install the Custom Nodes
-4. Load Models
+1. Install Automatic1111 (optional)
+1. Install ComfyUI
+1. Install the Custom Nodes
+1. Load Models
 
 ### Optional Operations
-5. Install FFMpeg
-6. Install Clip-Vision
-7. Install Control-Lora
-8. Install IPAdapter
-9. Onyx Runtime Fix
+1. Install Clip-Vision
+1. Install Control-Lora
+1. Install IPAdapter
+1. Install FFMpeg
+1. Onyx Runtime Fix
