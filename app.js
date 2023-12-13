@@ -2,10 +2,8 @@ import chalk from 'chalk';
 import { execSync, spawn } from 'child_process';
 import fs from 'fs';
 import fse from 'fs-extra';
-import fsp from 'fs/promises';
 import path from 'path';
 import utils from './utils.js';
-// import { test } from 'node-7z';
 import largeInstaller from './installers/largeInstaller.js';
 import nodeInstaller from './installers/nodeInstaller.js';
 
