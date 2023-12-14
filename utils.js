@@ -1,6 +1,6 @@
 import axios from 'axios';
 import chalk from 'chalk';
-import { exec, execSync, spawn } from 'child_process';
+import { exec, execSync } from 'child_process';
 import fs from 'fs';
 import fse from 'fs-extra';
 import fsp from 'fs/promises';
@@ -22,7 +22,14 @@ class Utils {
     pathTo7zip = sevenBin.path7za
 
     // ------------------------------------------------------------------
-    pathToRepo(item) {
+    extractErrorMessage = (fullErrorMessage, searchText = "ModuleNotFoundError: No module named") => {
+        const lines = fullErrorMessage.split('\n'); // Split the error message into lines
+        const line = lines.find(line => line.includes(searchText)); // Find the line containing the searchText
+        return line || null; // Return the found line or a default message
+    }
+
+    // ------------------------------------------------------------------
+    pathToRepo = (item) => {
         return path.join(global.prefs.dataPath, item.path, this.getNameFrom(item.url)); 
     }
 
@@ -247,6 +254,40 @@ class Utils {
         process.chdir(global.currentPath);
     }
 
+    // ------------------------------------------------------------------
+    fetchData = async (data, options = []) => {
+        data = this.filterWithOptions(data, options);
+        
+        console.log(`Installing/Downloading ${chalk.cyan(data.length,)} items...`)
+        for (const item of data) {
+            let targetPath = path.join(global.prefs.dataPath, item.path);
+            
+            switch(item.type){
+                case "get" : 
+                    await this.downloadFile(item.url, targetPath)
+                        .then(filePath => this.extractZip(filePath, targetPath))
+                        .catch(error => console.error(error));
+                break;
+                case "git" :
+                    let repoName = this.getNameFrom(item.url);
+                    let installPath = path.join(targetPath, repoName)
+                    if(fs.existsSync(installPath)){
+                        console.log(chalk.magenta(`\n${chalk.yellow(item.note)} already installed.`));
+                        continue;
+                    }    
+
+                    await this.cloneRepository(item.url, targetPath);
+                    if("reqs" in item){
+                        this.installRequirements(item);
+                    }
+                break;
+                case "civitai":
+                    await this.downloadCivitai(item);
+                break;
+            }
+        }
+    }
+
 
 // ------------------------------------------------------------------
     runCommand = (command) => {
@@ -321,7 +362,7 @@ class Utils {
                 writer.on('error', reject);
             });
         } catch (error) {
-            console.error('Error downloading file:', error);
+            console.error('Error downloading file:', error.config);
             throw error;
         }
     }
@@ -342,7 +383,7 @@ class Utils {
             })
 
             result.on('data', (data) => {
-                process.stdout.write(`\rExtracting: ${data.file.padEnd(80, ' ')}`);
+                process.stdout.write(`\rExtracting: ${data.file.padEnd(120, ' ')}`);
             });
             
             result.on('end', () => {
@@ -355,7 +396,7 @@ class Utils {
             }
 
             await this.delay(1000);
-            console.log(`\rExtraction ${"complete".padEnd(80,' ')}\n`);
+            console.log(`\rExtraction ${"complete".padEnd(120,' ')}\n`);
         }
         catch (error) {
             global.extracting = false;
@@ -457,8 +498,8 @@ class Utils {
         // Download the data and save generated files to disk
         console.log(chalk.magenta("Downloading:", Math.floor(versionFile.sizeKB / 1024),"mb...\n"));
         if(versionFile.type.toLowerCase() == "archive"){
-            await utils.downloadFile(versionFile.downloadUrl, global.currentPath)
-                .then(filePath => utils.extractZip(filePath, targetPath))
+            await this.downloadFile(versionFile.downloadUrl, global.currentPath)
+                .then(filePath => this.extractZip(filePath, targetPath))
                 .catch(error => console.error(error));    
             return;
         }

@@ -277,11 +277,20 @@
         {
             "type": "git",
             "path": "custom_nodes",
+            "setup": "none",
+            "note": "Image Grid Nodes",
+            "url": "https://github.com/LEv145/images-grid-comfy-plugin.git"
+        },
+        {
+            "reqs":true,
+            "type": "git",
+            "path": "custom_nodes",
             "setup": "basic",
             "note": "Stability Nodes",
             "url": "https://github.com/Stability-AI/stability-ComfyUI-nodes.git"
         },
         {
+            "reqs":true,
             "type": "git",
             "path": "custom_nodes",
             "setup": "basic",
@@ -305,14 +314,6 @@
             "url": "https://github.com/ltdrdata/ComfyUI-Impact-Pack.git"
         },
         {
-            "type": "git",
-            "path": "custom_nodes",
-            "setup": "custom",
-            "installer": "mtbInstaller",
-            "note": "MTB",
-            "url": "https://github.com/melMass/comfy_mtb.git"
-        },
-        {
             "type": "zip",
             "path": "custom_nodes",
             "setup": "custom",
@@ -321,6 +322,7 @@
             "url": "https://github.com/SeargeDP/SeargeSDXL/releases/download/v3.999/SeargeSDXL-Installer.zip"
         },
         {
+            "reqs":true,
             "type": "git",
             "path": "custom_nodes",
             "setup": "custom",
