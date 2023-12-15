@@ -20,6 +20,8 @@ const directories = [
     "output",
     "workflows",     
     "models/checkpoints",
+    "models/checkpoints/sd",
+    "models/checkpoints/sdxl",
     "models/classifiers",
     "models/clip",
     "models/clip_vision",
@@ -34,6 +36,8 @@ const directories = [
     "models/ipadapter",
     "models/ldsr",
     "models/loras",
+    "models/loras/sd",
+    "models/loras/sdxl",
     "models/lycoris",
     "models/style_models",
     "models/swinir",
@@ -105,8 +109,13 @@ const prepareEnvironment = async () => {
 // ------------------------------------------------------------------
 const installFFMpeg = async () => {
     if(utils.ffmpegExists()){
-        console.log(`\n${chalk.yellow("FFMpeg")} already installed.`);
-        return;
+        console.log(chalk.yellow("\nFFMpeg already installed."));
+        if(await utils.promptConfirmation(`Do you want to reinstall ${chalk.yellow("FFMpeg")}?`)){
+            fse.emptyDirSync(path.join(global.prefs.rootPath, 'ffmpeg'));
+        }
+        else {
+            return;
+        }
     }
 
     console.log("\nFFMpeg not installed. Downloading and installing FFMpeg...");
@@ -123,27 +132,6 @@ const installFFMpeg = async () => {
     console.log(`Install complete: ${chalk.yellow("FFMpeg")}`);
 }
 
-// ------------------------------------------------------------------
-const largeInstalls = async () => {
-    let index = 1;
-    console.log(chalk.yellow('\nInstall:'));
-    jsonData.largeInstalls.forEach((item) => {
-        console.log(`${chalk.yellow(index)}. ${item.name} ~${item.size}g`);
-        index++;
-    });
-
-    console.log(`${chalk.yellow(index)}. Back`);
-    index = await utils.promptUser('Enter your choice');
-    index = parseInt(index, 10) - 1;
-    if(index >= global.jsonData.largeInstalls.length){
-        return;
-    }
-    
-    const item = global.jsonData.largeInstalls[index];
-    if (largeInstaller.hasOwnProperty(item.installer)) {
-        await largeInstaller[item.installer](item);
-    }
-}
 
 // ------------------------------------------------------------------
 const loadModels = async () => {
@@ -183,7 +171,7 @@ const loadModels = async () => {
 // ------------------------------------------------------------------
 
 const showModelMenu = () => {
-    console.log(chalk.yellow('\nInstall for:'));
+    console.log(`\nChoose an Option: ${chalk.yellow('(Model Data)')}`);
     console.log(`${chalk.yellow('1')}. SD`);
     console.log(`${chalk.yellow('2')}. SDXL`);
     console.log(`${chalk.yellow('3')}. SD and SDXL`);
@@ -196,15 +184,16 @@ const showMainMenu = () => {
     const autoMessage = autoInstaller.isInstalled() ? `${chalk.green('Re-Install')}` : `Install`;
     const comfyMessage = comfyInstaller.isInstalled() ? `${chalk.green('Re-Install')}` : `Install`;
     const nodeMessage = comfyInstaller.nodesInstalled() ? `${chalk.green('Re-Install')}` : `Install`;
+    const ffmpegMessage = utils.ffmpegExists() ? `${chalk.green('Re-Install')}` : `Install`;
 
     console.log(chalk.gray("\nData from config.json"));
-    console.log(chalk.yellow('Choose an option:'));
+    console.log(`\nChoose an Option:`);
     console.log(`${chalk.yellow('1')}. ${autoMessage} Automatic1111`);
     console.log(`${chalk.yellow('2')}. ${comfyMessage} ComfyUI`);
     console.log(`${chalk.yellow('3')}. ${nodeMessage} Custom Nodes`);
     console.log(`${chalk.yellow('4')}. Load Models...`);
     console.log(`${chalk.yellow('5')}. Large Installs...`);
-    console.log(`${chalk.yellow('6')}. Install FFMpeg (admin)` );
+    console.log(`${chalk.yellow('6')}. ${ffmpegMessage} FFMpeg (admin)`);
     console.log(`${chalk.yellow('7')}. Onyx Runtime Fix`);
     console.log(`${chalk.yellow('8')}. Exit`);
 }
@@ -239,7 +228,7 @@ const handleUserInput = async (input) => {
             await loadModels();
         break;
         case '5':
-            await largeInstalls();
+            await largeInstaller.install();
         break;
         case '6':
             await installFFMpeg();
@@ -275,6 +264,14 @@ await prepareEnvironment();
 
 // import nodeInstaller from './workers/nodeInstaller.js';
 // await nodeInstaller.install("custom");
+
+// const item = {
+//     "type": "civitai",
+//     "path": "models/checkpoints/sd",
+//     "note": "Analog Madness",
+//     "modelId": 8030
+// }
+// utils.downloadCivitai(item);
 
 showMainMenu();
 await waitForUserInput();

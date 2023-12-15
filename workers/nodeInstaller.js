@@ -67,11 +67,16 @@ class NodeInstaller {
             const child = spawn("SeargeSDXL-Installer.bat"); 
             
             child.stdout.on('data', (data) => {
-                console.log(`stdout: ${data}`);
-                if(data.toString().includes('then press enter') ||  data.toString().includes('continue . . .')){
+                let dataString = data.toString();
+                if(!dataString.includes('Transferred') && !dataString.includes(' ] - ')){
+                    console.log(`stdout: ${data}`);
+                }
+
+                if(dataString.includes('then press enter') ||  dataString.includes('continue . . .')){
                     child.stdin.write('\n');
                 }
-                else if (data.toString().includes('(default = [r]')) {
+                else if (dataString.includes('(default = [r]')) {
+                    console.log("Downloading Model for Searge:", commands[commandIndex]);
                     child.stdin.write(commands[commandIndex]);
                     commandIndex++;
                 }

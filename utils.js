@@ -83,8 +83,8 @@ class Utils {
 // ------------------------------------------------------------------
     searchFor = async (searchPath, searchTerm) => {
         const filesAndFolders = await fsp.readdir(searchPath);
-        const matchingFolders = filesAndFolders.filter(str => str.includes(searchTerm));
-        console.log('Matched folders:', matchingFolders);
+        const matchingFolders = filesAndFolders.filter(str => str.toLocaleLowerCase().includes(searchTerm));
+        // console.log('Matched folders:', matchingFolders);
         return matchingFolders;
     }
 
@@ -406,10 +406,10 @@ class Utils {
 
 
 // ------------------------------------------------------------------
-    getVersionInfo = (modelVersion) => {
+    getVersionInfo = (modelData, modelVersion) => {
         let metadata = {
-            description:jsonData.description,
-            name:jsonData.name,
+            description:modelData.description,
+            name:modelData.name,
             extensions: {
                 super_installer: {
                     version: "0.0.1",
@@ -439,48 +439,60 @@ class Utils {
         versionFile.imageUrl = modelVersion.images[0].url;
         
         // Mark up the url with versionFile metadata
-        let downloadUrl = versionFile.downloadUrl + "?";
         if('type' in versionFile){
             versionFile.metadata.type = versionFile.type;
         }
 
-        if('metadata' in versionFile){
-            for (const key in versionFile.metadata) {
-                if(versionFile.metadata[key] != null && !downloadUrl.includes(key)){
-                    downloadUrl += `&${key}=${versionFile.metadata[key]}`;
-                }  
-            }
-        }
-
-        versionFile.downloadUrl = downloadUrl;
+        // let downloadUrl = versionFile.downloadUrl.includes("?") ? versionFile.downloadUrl : versionFile.downloadUrl + "?";
+        // if('metadata' in versionFile){
+        //     for (const key in versionFile.metadata) {
+        //         if(versionFile.metadata[key] != null && !downloadUrl.includes(key)){
+        //             downloadUrl += `&${key}=${versionFile.metadata[key]}`;
+        //         }  
+        //     }
+        // }
+        // versionFile.downloadUrl = downloadUrl;
         return versionFile;
     }
 
-
 // ------------------------------------------------------------------
-    getModelVersion = async (item) => {
-        console.log(`Fetching metadata for model:${chalk.yellow(item.note)} id:${chalk.yellow(item.modelId)}`);
-        const jsonData = await this.fetchJson(`https://civitai.com/api/v1/models/${item.modelId}`);
-
-        if(!jsonData || !jsonData.modelVersions || jsonData.modelVersions.length == 0){
-            return null;
-        }
-        
-        let modelVersion = jsonData.modelVersions[0];
+    getModelVersion = async (modelData, item) => {
+        let modelVersion = modelData.modelVersions[0];
         if('versionId' in item){
-            modelVersion = jsonData.modelVersions.filter(version => version.id === item.versionId)[0];
+            modelVersion = modelData.modelVersions.filter(version => version.id === item.versionId)[0];
         }
         
         return modelVersion;
     }
 
+// ------------------------------------------------------------------
+    getModelData = async (item) => {
+        console.log(`Fetching metadata for model:${chalk.yellow(item.note)} id:${chalk.yellow(item.modelId)}`);
+        try {
+            const modelData = await this.fetchJson(`https://civitai.com/api/v1/models/${item.modelId}`);
+            if(!modelData || !modelData.modelVersions || modelData.modelVersions.length == 0){
+                return null;
+            }
+            return modelData;
+        }
+        catch(error){
+            console.log(chalk.red("GetModelData:"),error);
+            return null;
+        }
+    }
 
 // ------------------------------------------------------------------
     downloadCivitai = async (item) => {
         const targetPath = path.join(global.prefs.dataPath, item.path);
-        const modelVersion = await this.getModelVersion(item);
-        if(!modelVersion){
+        const modelData = await this.getModelData(item);
+        if(!modelData){
             console.log(chalk.red(`Unable to find metadata for model:${chalk.yellow(item.note)}\n`));
+            return;
+        }
+
+        const modelVersion = await this.getModelVersion(modelData, item);
+        if(!modelVersion){
+            console.log(chalk.red(`Unable to find model version for model:${chalk.yellow(item.note)}\n`));
             return;
         }
         
@@ -496,7 +508,8 @@ class Utils {
         }
 
         // Download the data and save generated files to disk
-        console.log(chalk.magenta("Downloading:", Math.floor(versionFile.sizeKB / 1024),"mb...\n"));
+        console.log(chalk.magenta("Downloading:", Math.floor(versionFile.sizeKB / 1024),"mb..."));
+        console.log(`Type: ${chalk.cyan(versionFile.type)}\n`);
         if(versionFile.type.toLowerCase() == "archive"){
             await this.downloadFile(versionFile.downloadUrl, global.currentPath)
                 .then(filePath => this.extractZip(filePath, targetPath))
@@ -504,9 +517,10 @@ class Utils {
             return;
         }
         
-        const versionInfo = this.getVersionInfo(modelVersion);
+        const versionInfo = this.getVersionInfo(modelData, modelVersion);
+        versionInfo.name = versionInfo.name || versionFile.name;
         fse.writeJsonSync(path.join(targetPath,`${versionFile.filePrefix}.json`), versionInfo, { spaces: 2 });
-        fse.writeJsonSync(path.join(targetPath,`${versionFile.filePrefix}.civitai.info`), jsonData, { spaces: 2 });
+        fse.writeJsonSync(path.join(targetPath,`${versionFile.filePrefix}.civitai.info`), modelData, { spaces: 2 });
         await this.downloadFile(versionFile.imageUrl, targetPath, `${versionFile.filePrefix}.${versionFile.imageType}`);
         await this.downloadFile(versionFile.downloadUrl, targetPath, versionFile.name);
     }

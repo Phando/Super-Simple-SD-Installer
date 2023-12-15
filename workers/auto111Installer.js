@@ -70,6 +70,10 @@ class AutomaticInstaller {
         utils.saveFile(path.join(applicationPath,"webui-user.bat"), configString.replace(/\\/g, '/'));
         // TODO: Add localStartup and sharedStarup
         console.log(`Install complete: ${chalk.yellow("Automatic 1111")}`);
+        console.log(chalk.cyanBright("Please run Automatic1111 to finish installation."));
+        console.log(chalk.cyanBright("You can run this script again after the Autmatic1111 run."));
+        console.log(`\n${path.join(global.autoPath, "run.bat")}\n`);
+        process.exit;
     }
 
 // ------------------------------------------------------------------

@@ -44,7 +44,8 @@
             "type": "civitai",
             "path": "models/checkpoints/sd",
             "note": "Analog Madness",
-            "modelId": 8030
+            "modelId": 8030,
+            "versionId":261539
         },
         {
             "type": "civitai",
@@ -592,18 +593,23 @@
             "name": "Clip Vision",
             "installer": "unclipInstaller",
             "path": "models/clip_vision",
+            "searchTerm": "unclip",
             "modelUrl": "https://huggingface.co/comfyanonymous/wd-1.5-beta3_unCLIP",
             "size": 75
         },
         { 
             "name":"Control-Lora",
             "installer": "controlLoraInstaller",
+            "path": "models/controlnet",
+            "searchTerm": "rank128",
             "modelUrl": "https://huggingface.co/stabilityai/control-lora",
             "size": 70
         },
         {
             "name": "IPAdapter",
             "installer": "ipadapterInstaller",
+            "path": "models/ipadapter",
+            "searchTerm": "sdxl",
             "nodeUrl":"https://github.com/cubiq/ComfyUI_IPAdapter_plus.git",
             "modelUrl":"https://huggingface.co/h94/IP-Adapter",
             "size": 10

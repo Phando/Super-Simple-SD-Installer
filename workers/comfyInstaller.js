@@ -102,7 +102,7 @@ class ComfyInstaller {
     // ------------------------------------------------------------------
     installCustomNodes = async () => {
         if(this.nodesInstalled()){
-            console.log(chalk.yellow("\Custom Nodes already installed."));
+            console.log(chalk.yellow("\nCustom Nodes already installed."));
             if(await utils.promptConfirmation(`Do you want to reinstall ${chalk.yellow("Custom Nodes")}?`)){
                 await nodeInstaller.uninstall(true);
             }
