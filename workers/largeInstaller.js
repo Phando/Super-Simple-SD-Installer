@@ -105,7 +105,6 @@ class LargeInstaller {
 
     // ------------------------------------------------------------------
     unclipInstaller = async (item) =>  {
-        console.log(chalk.magenta(`\n${item.name} not installed\n Downloading and installing ${item.name}... ~${item.size}g`));
         let targetPath = path.join(global.prefs.dataPath, item.path);
         await utils.cloneRepository(item.modelUrl, targetPath);
         console.log(`Install complete: ${chalk.yellow(item.name)}`);

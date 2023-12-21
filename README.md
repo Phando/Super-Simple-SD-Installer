@@ -108,10 +108,11 @@ It is simple as:
 `./installSD.bat`
 
 Or you can run the command the is inside the installSD.bat file
-`node --max-old-space-size=65216 .\app.js`
+`node --max-old-space-size=81520 .\app.js`
 
 ### Typical Operation
-1. Install Automatic1111 (optional)
+1. Install Automatic1111
+1. Run and Close Automatic1111 to install extra bits
 1. Install ComfyUI
 1. Install the Custom Nodes
 1. Load Models

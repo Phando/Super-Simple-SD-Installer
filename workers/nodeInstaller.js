@@ -131,8 +131,15 @@ class NodeInstaller {
             let nodePath = path.join(global.prefs.dataPath, item.path); 
             
             if(item.type == "git"){
-                let workflowPath = await utils.cloneRepository(item.url, nodePath);
-                workflowPath = path.join(path.join(workflowPath, "workflows"))
+                let sourcePath = await utils.cloneRepository(item.url, nodePath);
+                
+                let examplePath = path.join(path.join(sourcePath, "examples"))
+                if(fs.existsSync(examplePath)){
+                    let repoName = utils.getNameFrom(item.url);
+                    fse.copySync(examplePath, path.join(global.prefs.dataPath, "workflows", repoName))
+                }
+                
+                let workflowPath = path.join(path.join(sourcePath, "workflows"))
                 if(fs.existsSync(workflowPath)){
                     let repoName = utils.getNameFrom(item.url);
                     fse.copySync(workflowPath, path.join(global.prefs.dataPath, "workflows", repoName))

@@ -21,6 +21,7 @@ class ComfyInstaller {
     makeSymlinks = () => {
         utils.makeLink(path.join(global.prefs.dataPath,"custom_nodes"),path.join(global.comfyPath, "ComfyUI/custom_nodes"));
         utils.makeLink(path.join(global.prefs.dataPath,"models"),path.join(global.comfyPath, "ComfyUI/models"));
+        console.log(`Symlinks created for both ${chalk.yellow("custom_nodes")} and ${chalk.yellow("models")}\n`);
     }
 
     // ------------------------------------------------------------------
@@ -47,7 +48,7 @@ class ComfyInstaller {
     }
 
     // ------------------------------------------------------------------
-    cycleComfyUI = async (waitTime = 180) => {
+    cycleApp = async (waitTime = 180) => {
         global.childRunning = true;
         let count = 0;
         let args = ['-s', 'ComfyUI/main.py', '--windows-standalone-build', '--disable-auto-launch', '--port', global.prefs.comfyPort];
@@ -113,15 +114,15 @@ class ComfyInstaller {
         
         // Simple Installs
         await nodeInstaller.install("none");
-        await this.cycleComfyUI(); // 20
+        await this.cycleApp(); // 20
 
         // Requirements Needed 
         await nodeInstaller.install("basic");
-        await this.cycleComfyUI();
+        await this.cycleApp();
 
         // Custom Installs
         await nodeInstaller.install("custom");
-        await this.cycleComfyUI();  
+        await this.cycleApp();  
         console.log(`Install complete: ${chalk.yellow("Custom Nodes")}`);
     }
 
@@ -226,7 +227,7 @@ class ComfyInstaller {
         this.makeSymlinks();
         // Install the manager
         utils.fetchData(global.jsonData.customNodes, [{url:"ComfyUI-Manager.git"}]);
-        await this.cycleComfyUI(60);
+        await this.cycleApp(60);
         console.log(`Install complete: ${chalk.yellow("ComfyUI & Manager")}`);
         
         let input = await utils.promptConfirmation(`Would you like to install the ${chalk.yellow("Custom Nodes")}?`);

@@ -9,5 +9,5 @@ if %errorlevel% == 0 (
 
 echo Starting the installer...
 @REM Check if there is an error and run npm install
-node --max-old-space-size=65216 .\app.js
+node --max-old-space-size=81520 .\app.js
 

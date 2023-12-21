@@ -5,12 +5,20 @@ import path from 'path';
 import utils from '../utils.js';
 
 class AutomaticInstaller {
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
     isInstalled = () => {
         return fs.existsSync(global.autoPath)
     }
 
-// ------------------------------------------------------------------
+    // ------------------------------------------------------------------
+    cycleApp = async () => {
+        //console.log(chalk.cyanBright("Please run Automatic1111 to finish installation."));
+        //console.log(chalk.cyanBright("You can run this script again after the Autmatic1111 run."));
+        // console.log(`\ncd "${global.autoPath}"; ./run.bat\n`);
+        // exec('start cmd.exe /k "cd \\"' + global.autoPath + '\\" && .\\run.bat"');
+    }
+
+    // ------------------------------------------------------------------
     install = async () => {
         if(this.isInstalled()){
             console.log(chalk.yellow("\nAuto1111 already installed."));
@@ -69,11 +77,12 @@ class AutomaticInstaller {
         
         utils.saveFile(path.join(applicationPath,"webui-user.bat"), configString.replace(/\\/g, '/'));
         // TODO: Add localStartup and sharedStarup
+        
+        
         console.log(`Install complete: ${chalk.yellow("Automatic 1111")}`);
         console.log(chalk.cyanBright("Please run Automatic1111 to finish installation."));
         console.log(chalk.cyanBright("You can run this script again after the Autmatic1111 run."));
-        console.log(`\n${path.join(global.autoPath, "run.bat")}\n`);
-        process.exit;
+        console.log(`\ncd "${global.autoPath}"; ./run.bat\n`);
     }
 
 // ------------------------------------------------------------------

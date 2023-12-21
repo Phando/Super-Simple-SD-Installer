@@ -195,7 +195,8 @@ const showMainMenu = () => {
     console.log(`${chalk.yellow('5')}. Large Installs...`);
     console.log(`${chalk.yellow('6')}. ${ffmpegMessage} FFMpeg (admin)`);
     console.log(`${chalk.yellow('7')}. Onyx Runtime Fix`);
-    console.log(`${chalk.yellow('8')}. Exit`);
+    console.log(`${chalk.yellow('8')}. Create ComfyUI Symlinks (needed after update)`);
+    console.log(`${chalk.yellow('9')}. Exit`);
 }
 
 // ------------------------------------------------------------------
@@ -237,12 +238,15 @@ const handleUserInput = async (input) => {
             await onyxFix();
         break;
         case '8':
+            comfyInstaller.makeSymlinks();
+        break;
+        case '9':
         return;
         case 'admin':
             // Empty Case, used to recover after administrative messages
         break;
         default:
-            console.log('Invalid option, please enter 1-8');
+            console.log('Invalid option, please enter 1-9');
     }
 
     showMainMenu();

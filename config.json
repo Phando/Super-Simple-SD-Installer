@@ -1,6 +1,12 @@
 {
     "controlnets": [
         {
+            "type": "civitai",
+            "path": "models/controlnet",
+            "note": "QR Code Monster",
+            "modelId": 111006
+        },
+        {
             "type": "git",
             "path": "models/controlnet",
             "note": "ControlNet-v1-1",
@@ -436,12 +442,6 @@
             "path": "models/loras",
             "note": "Brightness",
             "modelId": 70034
-        },
-        {
-            "type": "civitai",
-            "path": "models/loras",
-            "note": "QR Code Monster",
-            "modelId": 111006
         },
         {
             "type": "civitai",
