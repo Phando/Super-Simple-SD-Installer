@@ -1,3 +1,7 @@
+> [!CAUTION]
+> This is repo probably outdated, things in the world of Stable Diffusion are moving fast
+
+
 # Super SD Installer
 This script is a quick way to get up and running with Automatic1111, ComfyUI and their Data. The script replicates the way I like to setup my Stable Diffusion apps. It puts the applications in one location and the data in another. That way they apps and data can be updated independently of each other.
 
